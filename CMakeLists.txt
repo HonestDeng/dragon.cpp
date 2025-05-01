@@ -15,10 +15,6 @@ endif()
 option(LLAMA_ALL_WARNINGS            "llama: enable all compiler warnings"                   ON)
 option(LLAMA_ALL_WARNINGS_3RD_PARTY  "llama: enable all compiler warnings in 3rd party libs" OFF)
 
-option(LLAMA_SANITIZE_THREAD         "llama: enable thread sanitizer"    OFF)
-option(LLAMA_SANITIZE_ADDRESS        "llama: enable address sanitizer"   OFF)
-option(LLAMA_SANITIZE_UNDEFINED      "llama: enable undefined sanitizer" OFF)
-
 if (APPLE)
     option(LLAMA_NO_ACCELERATE       "llama: disable Accelerate framework" OFF)
     option(LLAMA_NO_AVX              "llama: disable AVX" OFF)
@@ -26,22 +22,6 @@ if (APPLE)
     option(LLAMA_NO_FMA              "llama: disable FMA" OFF)
 endif()
 
-if (NOT MSVC)
-    if (LLAMA_SANITIZE_THREAD)
-        set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -fsanitize=thread")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread")
-    endif()
-
-    if (LLAMA_SANITIZE_ADDRESS)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}     -fsanitize=address -fno-omit-frame-pointer")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
-    endif()
-
-    if (LLAMA_SANITIZE_UNDEFINED)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}     -fsanitize=undefined")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined")
-    endif()
-endif()
 
 if (APPLE AND NOT LLAMA_NO_ACCELERATE)
     find_library(ACCELERATE_FRAMEWORK Accelerate)
