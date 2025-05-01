@@ -40,7 +40,7 @@
 
 **运行步骤:**
 
-1. 使用huggingface-cli从`https://huggingface.co/DengCaptain/Llama-7b`上下载Llama-7B的模型权重文件到models-hf中。
+1. 使用huggingface-cli从`https://huggingface.co/DengCaptain/Llama-7b`上下载Llama-7B的模型权重文件到models-hf中（如果下载过程中显示没有权限，你需要在huggingface仓库上同意仓库的规则）。
 2. 使用 `conver-pth-to-dragon.py` 脚本将models-hf中的pytorch格式的模型文件转为本项目的格式，比如dragon-model-f16.bin。
 3. 以上一步骤生成的模型文件作为输入参数，运行 `llama` 可执行文件。
 
