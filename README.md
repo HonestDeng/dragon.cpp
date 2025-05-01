@@ -32,17 +32,17 @@
     ```
     * `-j` 参数可以并行编译以加快速度（例如 `make -j4` 使用 4 个核心）。*
 
-成功编译后，你应该能在 `build/` 目录下找到名为 `main` (或者 `main.exe`) 的可执行文件。
+成功编译后，你应该能在 `build/` 目录下找到名为 `llama` (或者 `llama.exe`) 的可执行文件。
 
 ## 运行与测试
 
-要运行推理程序，请使用 `main` 可执行文件，并至少提供模型文件的路径。
+要运行推理程序，请使用 `llama` 可执行文件，并至少提供模型文件的路径。
 
 **运行步骤:**
 
 1. 使用huggingface-cli从`https://huggingface.co/DengCaptain/Llama-7b/settings`上下载Llama-7B的模型权重文件到models-hf中。
 2. 使用 `conver-pth-to-dragon.py` 脚本将models-hf中的pytorch格式的模型文件转为本项目的格式，比如dragon-model-f16.bin。
-3. 使用 `main.cpp` 中定义的代码，运行上一步骤生成的模型文件。
+3. 以上一步骤生成的模型文件作为输入参数，运行 `llama` 可执行文件。
 
 ## 调试提示
 
