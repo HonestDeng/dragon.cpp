@@ -22,7 +22,7 @@
     ```bash
     cmake ..
     ```
-    * 如果遇到问题，你可能需要修改 `CMakeLists.txt` 文件。 
+    * 如果遇到问题，你可能需要修改 `CMakeLists.txt` 文件。 **提示：我们只需要编译出llama可执行文件，无关cmake配置可以删除。** 
 
 3.  **编译项目:**
     ```bash
