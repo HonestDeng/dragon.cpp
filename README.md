@@ -24,13 +24,13 @@
     ```bash
     cmake ..
     ```
-    * 如果遇到问题，你可能需要修改 `CMakeLists.txt` 文件。 *
+    * 如果遇到问题，你可能需要修改 `CMakeLists.txt` 文件。 
 
 3.  **编译项目:**
     ```bash
     make -j
     ```
-    * `-j` 参数可以并行编译以加快速度。这一过程可能会出错，你需要找出问题并解决。*
+    * `-j` 参数可以并行编译以加快速度。这一过程可能会出错，你需要找出问题并解决。
 
 成功编译后，你应该能在 `build/` 目录下找到名为 `llama` (或者 `llama.exe`) 的可执行文件。
 
@@ -52,7 +52,7 @@
 *   **验证关键对象状态：** 确保像模型上下文 (`dragon_context`) 这样的核心对象在初始化后被正确设置，并在后续代码中保持有效。它们的值是否符合预期？
 *   **利用调试工具：** 使用 GDB 或 LLDB 等调试器单步执行代码，检查变量状态，理解控制流程。
 *   **添加诊断输出：** 在关键逻辑点（如函数入口/出口、循环内部、变量赋值后）添加 `fprintf(stderr, ...)` 语句，打印变量值或执行标记，以帮助追踪问题。本项目大量使用了 `fprintf(stderr, ...)` 进行日志输出，你可以效仿。
-*   **下面的链接可能对你有帮组：**[howto_use_address_sanitize](https://www.osc.edu/resources/getting_started/howto/howto_use_address_sanitizer), [how to enable AddressSanitizer in cmake](https://stackoverflow.com/questions/44320465/whats-the-proper-way-to-enable-addresssanitizer-in-cmake-that-works-in-xcode)
+*   **下面的链接可能对你有帮助：**[howto_use_address_sanitize](https://www.osc.edu/resources/getting_started/howto/howto_use_address_sanitizer), [how to enable AddressSanitizer in cmake](https://stackoverflow.com/questions/44320465/whats-the-proper-way-to-enable-addresssanitizer-in-cmake-that-works-in-xcode)
 
 ## 提交指南
 
