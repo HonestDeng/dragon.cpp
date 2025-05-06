@@ -42,7 +42,9 @@
 
 1. 使用huggingface-cli从`https://huggingface.co/DengCaptain/Llama-7b`上下载Llama-7B的模型权重文件到models-hf中（如果下载过程中显示没有权限，你需要在huggingface仓库上同意仓库的规则）。
 2. 使用 `conver-pth-to-dragon.py` 脚本将models-hf中的pytorch格式的模型文件转为本项目的格式，比如dragon-model-f16.bin。
-3. 以上一步骤生成的模型文件作为输入参数，运行 `llama` 可执行文件。
+3. 以上一步骤生成的模型文件作为输入参数，运行 `llama` 可执行文件。这一步你可能会遇到若干个错误，你需要找出原因并解决这些错误。
+4. 当程序最终可以正常生成token序列时（如下图），你就已经解决了本任务了。
+![最后运行结果展示](docs/最后运行结果展示.png)
 
 ## 调试提示
 
@@ -50,7 +52,7 @@
 *   **验证关键对象状态：** 确保像模型上下文 (`dragon_context`) 这样的核心对象在初始化后被正确设置，并在后续代码中保持有效。它们的值是否符合预期？
 *   **利用调试工具：** 使用 GDB 或 LLDB 等调试器单步执行代码，检查变量状态，理解控制流程。
 *   **添加诊断输出：** 在关键逻辑点（如函数入口/出口、循环内部、变量赋值后）添加 `fprintf(stderr, ...)` 语句，打印变量值或执行标记，以帮助追踪问题。本项目大量使用了 `fprintf(stderr, ...)` 进行日志输出，你可以效仿。
-*   **检查函数返回值：** 许多函数会返回布尔值或状态码来指示成功或失败。确保调用点检查了这些返回值。
+*   **下面的链接可能对你有帮组：**[howto_use_address_sanitize](https://www.osc.edu/resources/getting_started/howto/howto_use_address_sanitizer), [how to enable AddressSanitizer in cmake](https://stackoverflow.com/questions/44320465/whats-the-proper-way-to-enable-addresssanitizer-in-cmake-that-works-in-xcode)
 
 ## 提交指南
 
