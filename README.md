@@ -39,10 +39,11 @@
 **运行步骤:**
 
 1. 使用 huggingface-cli 从`https://huggingface.co/DengCaptain/Llama-7b`上下载Llama-7B的模型权重文件到models-hf中（如果下载过程中显示没有权限，你需要在huggingface仓库上同意仓库的规则）。
-2. 使用 `conver-pth-to-dragon.py` 脚本将models-hf中的pytorch格式的模型文件转为本项目的格式，比如dragon-model-f16.bin。
-3. 以上一步骤生成的模型文件作为输入参数，运行 `llama` 可执行文件。这一步你可能会遇到若干个错误，你需要找出原因并解决这些错误。
-4. 当程序最终可以正常生成token序列时（如下图），你就已经解决了本任务了。
-5. 说明：我们固定了随机数，所以理论上来说在你修改了所有错误之后会得到下面的token序列："` The Paperback of the The Norton Anthology of English Literature, Volume A: Beginnings to 16`"
+2. 或者，从百度云盘下载模型权重:通过网盘分享的文件：链接: https://pan.baidu.com/s/1GM5FpN6yCry1_LLCOWDPeQ?pwd=u5hr 提取码: u5hr
+3. 使用 `conver-pth-to-dragon.py` 脚本将models-hf中的pytorch格式的模型文件转为本项目的格式，比如dragon-model-f16.bin。
+4. 以上一步骤生成的模型文件作为输入参数，运行 `llama` 可执行文件。这一步你可能会遇到若干个错误，你需要找出原因并解决这些错误。
+5. 当程序最终可以正常生成token序列时（如下图），你就已经解决了本任务了。
+6. 说明：我们固定了随机数，所以理论上来说在你修改了所有错误之后会得到下面的token序列："` The Paperback of the The Norton Anthology of English Literature, Volume A: Beginnings to 16`"
 ![最后运行结果展示](figs/result.png)
 
 ## 调试提示
