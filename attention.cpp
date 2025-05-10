@@ -55,8 +55,7 @@ struct dragon_tensor* attention_forward(
     struct dragon_tensor* KQ = dragon_mul_mat(ctx0, K, Q);
     struct dragon_tensor* KQ_scaled = dragon_scale(ctx0, KQ,
         dragon_new_f32(ctx0, 1.0f / sqrt(float(n_embd) / n_head)));
-    struct dragon_tensor* KQ_masked = dragon_diag_mask_inf(ctx0, KQ_scaled, n_past);
-    struct dragon_tensor* KQ_soft_max = dragon_soft_max(ctx0, KQ_masked);
+    struct dragon_tensor* KQ_soft_max = dragon_soft_max(ctx0, KQ_scaled);
 
     struct dragon_tensor* V_trans = dragon_permute(ctx0,
         dragon_reshape_3d(ctx0,
@@ -87,9 +86,11 @@ struct dragon_tensor* ffn_forward(
     cur = dragon_mul_mat(ctx0, layer.w1, cur);
     cur = dragon_silu(ctx0, cur);
     cur = dragon_mul(ctx0, cur, tmp);
-    cur = dragon_mul_mat(ctx0, layer.w2, cur);
+    // cur = dragon_mul_mat(ctx0, layer.w2, cur);
+    //
+    // return dragon_add(ctx0, cur, inpFF);
 
-    return dragon_add(ctx0, cur, inpFF);
+    return dragon_mul_mat(ctx0, layer.w2, cur);
 }
 
 // 层归一化
