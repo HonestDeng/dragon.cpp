@@ -86,9 +86,6 @@ struct dragon_tensor* ffn_forward(
     cur = dragon_mul_mat(ctx0, layer.w1, cur);
     cur = dragon_silu(ctx0, cur);
     cur = dragon_mul(ctx0, cur, tmp);
-    // cur = dragon_mul_mat(ctx0, layer.w2, cur);
-    //
-    // return dragon_add(ctx0, cur, inpFF);
 
     return dragon_mul_mat(ctx0, layer.w2, cur);
 }

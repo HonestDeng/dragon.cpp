@@ -694,7 +694,7 @@ bool create_model_context_and_allocate_tensors(const std::string &fname, // Pass
               ctx_size / (1024.0 * 1024.0));
   }
 
-  auto & ctx = model.ctx; // Convenience alias
+  auto ctx = model.ctx; // Convenience alias
 
   // Create the dragon context
   {
