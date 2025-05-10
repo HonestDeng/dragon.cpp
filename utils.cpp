@@ -694,7 +694,7 @@ bool create_model_context_and_allocate_tensors(const std::string &fname, // Pass
               ctx_size / (1024.0 * 1024.0));
   }
 
-  auto ctx = model.ctx; // Convenience alias
+  auto & ctx = model.ctx; // Convenience alias
 
   // Create the dragon context
   {
@@ -979,7 +979,7 @@ bool load_model_weights(const std::string &fname, int n_parts,
         // Read magic, hparams, vocab again just to advance the stream pointer
          uint32_t magic;
          temp_fin.read((char *)&magic, sizeof(magic));
-         if (magic != 0x4b4c535) return false; // Should not happen if called after checks
+         if (magic != 0x4b4c5353) return false; // Should not happen if called after checks
 
          llama_hparams dummy_hparams;
          int dummy_nff, dummy_nparts;

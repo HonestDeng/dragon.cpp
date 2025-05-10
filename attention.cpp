@@ -55,7 +55,8 @@ struct dragon_tensor* attention_forward(
     struct dragon_tensor* KQ = dragon_mul_mat(ctx0, K, Q);
     struct dragon_tensor* KQ_scaled = dragon_scale(ctx0, KQ,
         dragon_new_f32(ctx0, 1.0f / sqrt(float(n_embd) / n_head)));
-    struct dragon_tensor* KQ_soft_max = dragon_soft_max(ctx0, KQ_scaled);
+    struct dragon_tensor* KQ_mask = dragon_diag_mask_inf(ctx0, KQ_scaled, n_past);
+    struct dragon_tensor* KQ_soft_max = dragon_soft_max(ctx0, KQ_mask);
 
     struct dragon_tensor* V_trans = dragon_permute(ctx0,
         dragon_reshape_3d(ctx0,
@@ -78,7 +79,7 @@ struct dragon_tensor* ffn_forward(
     struct dragon_context* ctx0,
     struct dragon_tensor* inpFF,
     const llama_layer& layer) {
-    
+
     struct dragon_tensor* cur = dragon_rms_norm(ctx0, inpFF);
     cur = dragon_mul(ctx0, dragon_repeat(ctx0, layer.ffn_norm, cur), cur);
 
@@ -86,8 +87,9 @@ struct dragon_tensor* ffn_forward(
     cur = dragon_mul_mat(ctx0, layer.w1, cur);
     cur = dragon_silu(ctx0, cur);
     cur = dragon_mul(ctx0, cur, tmp);
+    cur = dragon_mul_mat(ctx0, layer.w2, cur);
 
-    return dragon_mul_mat(ctx0, layer.w2, cur);
+    return dragon_add(ctx0, cur, inpFF);
 }
 
 // 层归一化
@@ -95,7 +97,7 @@ struct dragon_tensor* layer_norm(
     struct dragon_context* ctx0,
     struct dragon_tensor* inp,
     struct dragon_tensor* norm) {
-    
+
     struct dragon_tensor* cur = dragon_rms_norm(ctx0, inp);
     return dragon_mul(ctx0, dragon_repeat(ctx0, norm, cur), cur);
 }
@@ -108,7 +110,7 @@ bool llama_eval(
     const std::vector<gpt_vocab::id>& embd_inp,
     std::vector<float>& embd_w,
     size_t& mem_per_token) {
-    
+
     try {
         const int N = embd_inp.size();
         const auto& hparams = model.hparams;
@@ -120,7 +122,7 @@ bool llama_eval(
         // 初始化计算上下文
         static size_t buf_size = 512u * 1024 * 1024;
         static void* buf = nullptr;
-        
+
         if (mem_per_token > 0 && mem_per_token * N > buf_size) {
             const size_t buf_size_new = 1.1 * (mem_per_token * N);
             buf_size = buf_size_new;
@@ -146,23 +148,23 @@ bool llama_eval(
 
         for (int il = 0; il < n_layer; ++il) {
             struct dragon_tensor* inpSA = inpL;
-            
+
             // 注意力层
             struct dragon_tensor* cur = layer_norm(ctx0, inpL, model.layers[il].attention_norm);
             cur = attention_forward(ctx0, cur, model.layers[il], model.memory_k, model.memory_v,
                 n_past, n_embd, n_head, n_ctx, N, il, &gf);
-            
+
             struct dragon_tensor* inpFF = dragon_add(ctx0, cur, inpSA);
-            
+
             // 前馈网络
             cur = ffn_forward(ctx0, inpFF, model.layers[il]);
-            
+
             inpL = cur;
         }
 
         // 最终层归一化
         inpL = layer_norm(ctx0, inpL, model.norm);
-        
+
         // 输出层
         inpL = dragon_mul_mat(ctx0, model.output, inpL);
 
@@ -173,7 +175,7 @@ bool llama_eval(
         // 处理输出
         const int n_vocab = model.hparams.n_vocab;
         embd_w.resize(n_vocab);
-        memcpy(embd_w.data(), 
+        memcpy(embd_w.data(),
                (float*)dragon_get_data(inpL) + (n_vocab * (N - 1)),
                sizeof(float) * n_vocab);
 
@@ -187,4 +189,4 @@ bool llama_eval(
         fprintf(stderr, "Error in llama_eval: %s\n", e.what());
         return false;
     }
-} 
+}
