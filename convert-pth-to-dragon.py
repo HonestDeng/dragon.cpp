@@ -84,7 +84,7 @@ class Tokenizer:
 class ModelConverter:
     """模型转换器类"""
     FTYPE_STR = ["f32", "f16"]
-    MAGIC = 0x67677d6c
+    MAGIC = 0x4b4c5353 # maigc of KLSS
 
     def __init__(self, model_dir: str, ftype: int = 1):
         self.model_dir = model_dir

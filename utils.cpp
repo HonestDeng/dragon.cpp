@@ -979,7 +979,7 @@ bool load_model_weights(const std::string &fname, int n_parts,
         // Read magic, hparams, vocab again just to advance the stream pointer
          uint32_t magic;
          temp_fin.read((char *)&magic, sizeof(magic));
-         if (magic != 0x67676d6c) return false; // Should not happen if called after checks
+         if (magic != 0x4b4c535) return false; // Should not happen if called after checks
 
          llama_hparams dummy_hparams;
          int dummy_nff, dummy_nparts;
