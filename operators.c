@@ -9273,27 +9273,25 @@ static thread_ret_t dragon_graph_compute_thread(void * data) {
     const int n_threads = state->shared->n_threads;
 
     while (true) {
-        if (atomic_fetch_add(&state->shared->n_ready, 1) == n_threads - 1) {
+        // 同步屏障：所有线程在这里等待
+        if (atomic_fetch_add(&state->shared->n_ready, 1) == n_threads) {
+            // the last-arrived thread notice everyone to continue
             atomic_store(&state->shared->has_work, false);
         } else {
-            while (atomic_load(&state->shared->has_work)) {
+            while (!atomic_load(&state->shared->has_work)) {
                 if (atomic_load(&state->shared->stop)) {
                     return 0;
                 }
-                dragon_lock_lock  (&state->shared->spin);
-                dragon_lock_unlock(&state->shared->spin);
             }
         }
 
         atomic_fetch_sub(&state->shared->n_ready, 1);
 
         // wait for work
-        while (!atomic_load(&state->shared->has_work)) {
+        while (atomic_load(&state->shared->has_work)) {
             if (atomic_load(&state->shared->stop)) {
                 return 0;
             }
-            dragon_lock_lock  (&state->shared->spin);
-            dragon_lock_unlock(&state->shared->spin);
         }
 
         // check if we should stop
@@ -9609,14 +9607,11 @@ void dragon_graph_compute(struct dragon_context * ctx, struct dragon_cgraph * cg
 
         // COMPUTE
         if (node->n_tasks > 1) {
-            if (atomic_fetch_add(&state_shared.n_ready, 1) == n_threads - 1) {
+            if (atomic_fetch_add(&state_shared.n_ready, 1) == n_threads) {
                 atomic_store(&state_shared.has_work, false);
             }
 
-            while (atomic_load(&state_shared.has_work)) {
-                dragon_lock_lock  (&state_shared.spin);
-                dragon_lock_unlock(&state_shared.spin);
-            }
+            while (!atomic_load(&state_shared.has_work)) {}
 
             // launch thread pool
             for (int j = 0; j < n_threads - 1; j++) {
@@ -9632,10 +9627,7 @@ void dragon_graph_compute(struct dragon_context * ctx, struct dragon_cgraph * cg
 
             atomic_fetch_sub(&state_shared.n_ready, 1);
 
-            while (atomic_load(&state_shared.n_ready) > 0) {
-                dragon_lock_lock  (&state_shared.spin);
-                dragon_lock_unlock(&state_shared.spin);
-            }
+            while (atomic_load(&state_shared.n_ready) > 0) {}
 
             atomic_store(&state_shared.has_work, true);
         }
@@ -9645,33 +9637,24 @@ void dragon_graph_compute(struct dragon_context * ctx, struct dragon_cgraph * cg
 
         // wait for thread pool
         if (node->n_tasks > 1) {
-            if (atomic_fetch_add(&state_shared.n_ready, 1) == n_threads - 1) {
+            if (atomic_fetch_add(&state_shared.n_ready, 1) == n_threads) {
                 atomic_store(&state_shared.has_work, false);
             }
 
-            while (atomic_load(&state_shared.has_work)) {
-                dragon_lock_lock  (&state_shared.spin);
-                dragon_lock_unlock(&state_shared.spin);
-            }
+            while (atomic_load(&state_shared.has_work)) {}
 
             atomic_fetch_sub(&state_shared.n_ready, 1);
 
-            while (atomic_load(&state_shared.n_ready) != 0) {
-                dragon_lock_lock  (&state_shared.spin);
-                dragon_lock_unlock(&state_shared.spin);
-            }
+            while (atomic_load(&state_shared.n_ready) != 0) {}
         }
 
         // FINALIZE
         if (node->n_tasks > 1) {
-            if (atomic_fetch_add(&state_shared.n_ready, 1) == n_threads - 1) {
+            if (atomic_fetch_add(&state_shared.n_ready, 1) == n_threads) {
                 atomic_store(&state_shared.has_work, false);
             }
 
-            while (atomic_load(&state_shared.has_work)) {
-                dragon_lock_lock  (&state_shared.spin);
-                dragon_lock_unlock(&state_shared.spin);
-            }
+            while (atomic_load(&state_shared.has_work)) {}
 
             // launch thread pool
             for (int j = 0; j < n_threads - 1; j++) {
@@ -9687,10 +9670,7 @@ void dragon_graph_compute(struct dragon_context * ctx, struct dragon_cgraph * cg
 
             atomic_fetch_sub(&state_shared.n_ready, 1);
 
-            while (atomic_load(&state_shared.n_ready) > 0) {
-                dragon_lock_lock  (&state_shared.spin);
-                dragon_lock_unlock(&state_shared.spin);
-            }
+            while (atomic_load(&state_shared.n_ready) > 0) {}
 
             atomic_store(&state_shared.has_work, true);
         }
@@ -9700,21 +9680,15 @@ void dragon_graph_compute(struct dragon_context * ctx, struct dragon_cgraph * cg
 
         // wait for thread pool
         if (node->n_tasks > 1) {
-            if (atomic_fetch_add(&state_shared.n_ready, 1) == n_threads - 1) {
+            if (atomic_fetch_add(&state_shared.n_ready, 1) == n_threads) {
                 atomic_store(&state_shared.has_work, false);
             }
 
-            while (atomic_load(&state_shared.has_work)) {
-                dragon_lock_lock  (&state_shared.spin);
-                dragon_lock_unlock(&state_shared.spin);
-            }
+            while (atomic_load(&state_shared.has_work)) {}
 
             atomic_fetch_sub(&state_shared.n_ready, 1);
 
-            while (atomic_load(&state_shared.n_ready) != 0) {
-                dragon_lock_lock  (&state_shared.spin);
-                dragon_lock_unlock(&state_shared.spin);
-            }
+            while (atomic_load(&state_shared.n_ready) != 0) {}
         }
 
         // performance stats (node)
