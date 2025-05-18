@@ -130,7 +130,7 @@ std::string gpt_random_prompt(std::mt19937 & rng) {
     //     default: return "To";
     // }
 
-    return "The";
+    return "Once upon a time";
 }
 
 void replace(std::string & str, const std::string & needle, const std::string & replacement) {
