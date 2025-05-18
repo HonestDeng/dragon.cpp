@@ -15,17 +15,6 @@
 // TODO: move somewhere else
 #define QK 32
 
-// default hparams (LLaMA76B)
-struct llama_hparams {
-    int32_t n_vocab = 32000;
-    int32_t n_ctx   = 512;   // this is provided as user input?
-    int32_t n_embd  = 4096;
-    int32_t n_mult  = 256;
-    int32_t n_head  = 32;
-    int32_t n_layer = 32;
-    int32_t n_rot   = 64;
-    int32_t f16     = 1;
-};
 
 
 // quantize a model
@@ -63,7 +52,7 @@ bool llama_model_quantize(const std::string & fname_inp, const std::string & fna
     {
         uint32_t magic;
         finp.read((char *) &magic, sizeof(magic));
-        if (magic != 0x67676d6c) {
+        if (magic != 0x4b4c5353) {
             fprintf(stderr, "%s: invalid model file '%s' (bad magic)\n", __func__, fname_inp.c_str());
             return false;
         }
