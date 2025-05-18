@@ -87,21 +87,28 @@ endif()
 # endif()
 
 add_executable(llama
-    main.cpp
-    utils.cpp
-    utils.h
-    attention.cpp
-    attention.h)
+        main.cpp
+        utils.cpp
+        utils.h
+        attention.cpp
+        attention.h)
 
 add_library(operators
         operators.c
         operators.h)
 
+add_executable(quantize
+        quantize.cpp
+        utils.cpp
+        utils.h)
+
 target_compile_definitions(operators PUBLIC ${LLAMA_EXTRA_FLAGS})
 target_compile_definitions(llama PUBLIC ${LLAMA_EXTRA_FLAGS})
+target_compile_definitions(quantize PUBLIC ${LLAMA_EXTRA_FLAGS})
 
 
 target_link_libraries(operators PRIVATE ${LLAMA_EXTRA_LIBS})
 target_include_directories(operators PUBLIC .)
+target_link_libraries(quantize PRIVATE operators)
 target_link_libraries(llama PRIVATE operators)
 target_link_libraries(operators PRIVATE Threads::Threads)
