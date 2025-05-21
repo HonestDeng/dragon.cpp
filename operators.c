@@ -9275,7 +9275,7 @@ static thread_ret_t dragon_graph_compute_thread(void * data) {
     while (true) {
         // 同步屏障：所有线程在这里等待
         if (atomic_fetch_add(&state->shared->n_ready, 1) == n_threads) {
-            // the last-arrived thread notice everyone to continue
+            // 最后一个线程发出通知：所有线程已经到达，可以执行下一步操作
             atomic_store(&state->shared->has_work, false);
         } else {
             while (!atomic_load(&state->shared->has_work)) {
@@ -9287,7 +9287,7 @@ static thread_ret_t dragon_graph_compute_thread(void * data) {
 
         atomic_fetch_sub(&state->shared->n_ready, 1);
 
-        // wait for work
+        // 等待分配工作
         while (atomic_load(&state->shared->has_work)) {
             if (atomic_load(&state->shared->stop)) {
                 return 0;
