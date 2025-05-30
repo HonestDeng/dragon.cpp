@@ -41,7 +41,7 @@
 1. 使用 huggingface-cli 从`https://huggingface.co/DengCaptain/Llama-7b`上下载Llama-7B的模型权重文件到models-hf中（如果下载过程中显示没有权限，你需要在huggingface仓库上同意仓库的规则）。
 2. 或者，从百度云盘下载模型权重:通过网盘分享的文件：链接: https://pan.baidu.com/s/1GM5FpN6yCry1_LLCOWDPeQ?pwd=u5hr 提取码: u5hr
 3. 使用 `conver-pth-to-dragon.py` 脚本将models-hf中的pytorch格式的模型文件转为本项目的格式，比如dragon-model-f16.bin。
-4. 为了减轻内存负载，将模型量化为int4格式。
+4. 可选：为了减轻内存负载，使用quantize.cpp将模型量化为int4格式。
 5. 以上一步骤生成的模型文件作为输入参数，运行 `llama` 可执行文件。这一步你可能会遇到若干个错误，你需要找出原因并解决这些错误。
 6. 当程序最终可以正常生成token序列时（如下图），你就已经解决了本任务了。
 7. 说明：我们固定了随机数，所以理论上来说在你修改了所有错误之后会得到下面的token序列：` Once upon a time, there was this lovely couple who lived in the United States. They were madly and deeply in love with one`。
@@ -56,6 +56,8 @@
 *   **添加诊断输出：** 在关键逻辑点（如函数入口/出口、循环内部、变量赋值后）添加 `fprintf(stderr, ...)` 语句，打印变量值或执行标记，以帮助追踪问题。本项目大量使用了 `fprintf(stderr, ...)` 进行日志输出，你可以效仿。
 *   **注意模型结构：** 如果模型输出不符合预期，那么你需要搜索和了解Llama1的模型结构，仔细检查代码**是否正确地描述了Llama1-7b模型的结构**。
 *   **算子库：** `operators.h` 文件的43行的 `dragon_op` 枚举了本项目需要用到的**算子**。
+
+
 ## 提交指南
 
 在成功修复代码并能正确运行程序之后，你需要提交一份解题报告，内容应至少包括：
