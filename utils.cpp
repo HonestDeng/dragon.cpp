@@ -300,6 +300,7 @@ std::vector<gpt_vocab::id> gpt_tokenize(const gpt_vocab & vocab, const std::stri
 std::vector<gpt_vocab::id> llama_tokenize(const gpt_vocab & vocab, const std::string & text, bool bos) {
     // 输入：" Once upon a time" (开头有空格)
     // 输出：{1, 9038, 2501, 263, 931}
+    // 在调试时，你可以直接返回 {1, 9038, 2501, 263, 931}，但最后的提交代码要实现这个函数。
     std::vector<gpt_vocab::id> res = {0, 0};
 
     // TODO: Forward pass
