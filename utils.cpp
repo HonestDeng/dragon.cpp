@@ -289,8 +289,18 @@ std::vector<gpt_vocab::id> gpt_tokenize(const gpt_vocab & vocab, const std::stri
 
 #define MAX_TOKEN_LEN 18
 // 参考 https://guillaume-be.github.io/2020-05-30/sentence_piece
+/*
+    id    token string
+     1 -> ''
+  9038 -> ' Once'
+  2501 -> ' upon'
+   263 -> ' a'
+   931 -> ' time'
+*/
 std::vector<gpt_vocab::id> llama_tokenize(const gpt_vocab & vocab, const std::string & text, bool bos) {
-    std::vector<gpt_vocab::id> res;
+    // 输入：" Once upon a time" (开头有空格)
+    // 输出：{1, 9038, 2501, 263, 931}
+    std::vector<gpt_vocab::id> res = {0, 0};
 
     // TODO: Forward pass
 
