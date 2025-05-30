@@ -9594,7 +9594,14 @@ void dragon_graph_compute(struct dragon_context * ctx, struct dragon_cgraph * cg
         const int64_t perf_node_start_cycles  = dragon_perf_cycles();
         const int64_t perf_node_start_time_us = dragon_perf_time_us();
 
-        // INIT
+        // 每一个node计算分为三个阶段，分别是：
+        // 1. INIT 阶段：负责node的初始化操作，只需要主线程工作
+        // 2. COMPUTE 阶段：执行计算，主线程和其它线程一起工作
+        // 3. FINALIZE 阶段：整合计算结果，主线程和其它线程一起工作
+        // 在 COMPUTE 和 FINALIZE 阶段，主线程通过设置其它线程的 params 来分配任务。
+        // 各进程使用 state_shared 交互信息。你需要认真思考清楚 state_shared.n_ready 和 state_shared.has_work的功能。
+
+        // INIT 阶段：只需要主线程工作
         struct dragon_compute_params params = {
             /*.type  =*/ DRAGON_TASK_INIT,
             /*.ith   =*/ 0,
@@ -9605,7 +9612,7 @@ void dragon_graph_compute(struct dragon_context * ctx, struct dragon_cgraph * cg
 
         dragon_compute_forward(&params, node);
 
-        // COMPUTE
+        // COMPUTE 阶段：主线程和其它线程一起工作
         if (node->n_tasks > 1) {
             if (atomic_fetch_add(&state_shared.n_ready, 1) == n_threads) {
                 atomic_store(&state_shared.has_work, false);
@@ -9648,7 +9655,7 @@ void dragon_graph_compute(struct dragon_context * ctx, struct dragon_cgraph * cg
             while (atomic_load(&state_shared.n_ready) != 0) {}
         }
 
-        // FINALIZE
+        // FINALIZE 阶段：主线程和其它线程一起工作
         if (node->n_tasks > 1) {
             if (atomic_fetch_add(&state_shared.n_ready, 1) == n_threads) {
                 atomic_store(&state_shared.has_work, false);
