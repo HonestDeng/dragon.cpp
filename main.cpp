@@ -175,6 +175,11 @@ int main(int argc, char **argv) {
     }
 
     t_load_us = dragon_time_us() - t_start_us;
+
+    if (params.load_model_only) {
+      fprintf(stderr, "%s: model loaded successfully\n", __func__);
+      return 0;
+    }
   }
 
   // print system information

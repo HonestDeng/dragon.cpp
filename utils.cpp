@@ -75,6 +75,8 @@ bool gpt_params_parse(int argc, char ** argv, gpt_params & params) {
         } else if (arg == "-h" || arg == "--help") {
             gpt_print_usage(argc, argv, params);
             exit(0);
+        } else if (arg == "--load-model-only") {
+            params.load_model_only = true;
         } else {
             fprintf(stderr, "error: unknown argument: %s\n", arg.c_str());
             gpt_print_usage(argc, argv, params);
@@ -111,6 +113,7 @@ void gpt_print_usage(int argc, char ** argv, const gpt_params & params) {
     fprintf(stderr, "  -b N, --batch_size N  batch size for prompt processing (default: %d)\n", params.n_batch);
     fprintf(stderr, "  -m FNAME, --model FNAME\n");
     fprintf(stderr, "                        model path (default: %s)\n", params.model.c_str());
+    fprintf(stderr, "  --load-model-only     only load model for testing, not run inference\n");
     fprintf(stderr, "\n");
 }
 
