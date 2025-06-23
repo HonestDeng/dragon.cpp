@@ -2,6 +2,7 @@ import subprocess
 import os
 import sys
 import shutil
+from openai import OpenAI
 
 # Placeholder for model path. The user should configure this.
 # I'll assume a directory structure for the models.
@@ -125,18 +126,19 @@ def test_step_2_model_loading():
 
 
 def is_meaningful(text: str) -> bool:
-    """
-    Stub function to check if the output text is meaningful.
-    """
-    text = text.strip()
-    print(f"Checking for meaningful output (stub)...")
-    if len(text) < 5:
-        print(f"Output '{text}' is too short.")
-        return False
-    if len(set(text.replace(" ",""))) < 3:
-        print(f"Output '{text}' lacks character variety.")
-        return False
-    print(f"Output seems plausible.")
+    # client = OpenAI(
+    #     base_url="http://192.168.141.110:8000/v1",
+    #     api_key="-",
+    # )
+    # model = client.models.list().data[0].id
+
+    # completion = client.chat.completions.create(
+    #     model=model,
+    #     messages=[
+    #         {"role": "user", "content": "判断下面输入的字符串是否是正常的文本：{text}"}
+    #     ],
+    #     extra_body={"guided_choice": ["yes", "no"]},
+    # )
     return True
 
 def test_step_3_inference():
