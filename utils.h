@@ -161,6 +161,10 @@ struct llama_model {
 };
 
 // Helper functions for model loading
+
+bool llama_model_load(const std::string &fname, llama_model &model,
+                      gpt_vocab &vocab, int user_n_ctx);
+
 bool load_hparams(std::ifstream &fin, llama_hparams &hparams, int user_n_ctx,
                   int &n_ff, int &n_parts);
 
