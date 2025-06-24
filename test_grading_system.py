@@ -126,20 +126,24 @@ def test_step_2_model_loading():
 
 
 def is_meaningful(text: str) -> bool:
-    # client = OpenAI(
-    #     base_url="http://192.168.141.110:8000/v1",
-    #     api_key="-",
-    # )
-    # model = client.models.list().data[0].id
+    client = OpenAI(
+        base_url="http://192.168.141.110:8000/v1",
+        api_key="-",
+    )
+    model = client.models.list().data[0].id
 
-    # completion = client.chat.completions.create(
-    #     model=model,
-    #     messages=[
-    #         {"role": "user", "content": "判断下面输入的字符串是否是正常的文本：{text}"}
-    #     ],
-    #     extra_body={"guided_choice": ["yes", "no"]},
-    # )
-    return True
+    completion = client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "user", "content": f"判断下面输入的字符串是否是正常的文本：{text}"}
+        ],
+        extra_body={"guided_choice": ["yes", "no"]},
+    )
+
+    print("reasoning_content: ", completion.choices[0].message.reasoning_content)
+    print("content: ", completion.choices[0].message.content)
+
+    return completion.choices[0].message.content == "yes"
 
 def test_step_3_inference():
     """
@@ -152,7 +156,7 @@ def test_step_3_inference():
     cmd = [EXECUTABLE_PATH, "-m", CONVERTED_MODEL_PATH, "-n", "20"]
     try:
         # 5-minute timeout for deadlock detection
-        process = subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=300)
+        process = subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=60)
         # The C++ program prints the prompt first, so we should strip it.
         output = process.stdout.replace(prompt, "").strip()
         print(f"Inference output: {output}")
@@ -165,7 +169,7 @@ def test_step_3_inference():
         return True
 
     except subprocess.TimeoutExpired:
-        print("Error: Inference timed out after 5 minutes. A deadlock is likely.")
+        print("Error: Inference timed out after 1 minutes. A deadlock is likely.")
         return False
     except subprocess.CalledProcessError as e:
         print("Error: The program crashed during inference.")
@@ -227,15 +231,15 @@ def main():
         print("Aborting tests due to build failure.")
         sys.exit(1)
 
-    # results["step_1_model_conversion"] = test_step_1_model_conversion()
-    # if not results["step_1_model_conversion"]:
-    #     print("Skipping subsequent tests as model conversion failed.")
-    #     # Fill remaining tests as failed
-    #     results["step_2_model_loading"] = False
-    #     results["step_3_inference"] = False
-    # else:
-    #     results["step_2_model_loading"] = test_step_2_model_loading()
-    #     results["step_3_inference"] = test_step_3_inference()
+    results["step_1_model_conversion"] = test_step_1_model_conversion()
+    if not results["step_1_model_conversion"]:
+        print("Skipping subsequent tests as model conversion failed.")
+        # Fill remaining tests as failed
+        results["step_2_model_loading"] = False
+        results["step_3_inference"] = False
+    else:
+        results["step_2_model_loading"] = test_step_2_model_loading()
+        results["step_3_inference"] = test_step_3_inference()
 
     # Tokenizer test can be run independently of model loading/inference results
     results["step_4_tokenizer"] = test_step_4_tokenizer()
