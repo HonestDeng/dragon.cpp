@@ -35,70 +35,6 @@ static const std::map<int, int> LLAMA_N_PARTS = {
     {8192, 8},
 };
 
-// load the model's weights from a file
-bool llama_model_load(const std::string &fname, llama_model &model,
-                      gpt_vocab &vocab, int user_n_ctx) { // Changed n_ctx to user_n_ctx for clarity
-  fprintf(stderr, "%s: loading model from '%s' - please wait ...\n", __func__,
-          fname.c_str());
-
-  // Open file and check magic number
-  std::ifstream fin(fname, std::ios::binary);
-  std::vector<char> f_buf(1024 * 1024); // Optional: buffer for initial reads
-  fin.rdbuf()->pubsetbuf(f_buf.data(), f_buf.size());
-
-  if (!fin) {
-    fprintf(stderr, "%s: failed to open '%s'\n", __func__, fname.c_str());
-    return false;
-  }
-
-  {
-    uint32_t magic;
-    fin.read((char *)&magic, sizeof(magic));
-    if (magic != 0x4b4c535) {
-      fprintf(stderr, "%s: invalid model file '%s' (bad magic)\n", __func__,
-              fname.c_str());
-      return false;
-    }
-  }
-
-  int n_ff = 0;
-  int n_parts = 0;
-
-  // Load hparams using helper
-  if (!load_hparams(fin, model.hparams, user_n_ctx, n_ff, n_parts)) {
-    fin.close();
-    return false;
-  }
-
-  // Load vocab using helper
-  if (!load_vocab(fin, vocab, model.hparams)) {
-    fin.close();
-    return false;
-  }
-
-  // Close the initial file stream as metadata is read
-  fin.close();
-
-
-  // Create context and allocate tensors using helper
-  if (!create_model_context_and_allocate_tensors(fname, model, n_ff)) {
-    // Context creation failed, model.ctx might be invalid, cleanup?
-    // dragon_free(model.ctx); // Maybe add a cleanup helper too
-    return false;
-  }
-
-  // Load weights using helper
-  if (!load_model_weights(fname, n_parts, model)) {
-    // Weight loading failed, cleanup?
-    // dragon_free(model.ctx);
-    return false;
-  }
-
-  // All steps successful
-  fprintf(stderr, "%s: model loaded successfully\n", __func__);
-  return true;
-}
-
 static bool is_interacting = false;
 
 #if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)) || \
@@ -175,11 +111,6 @@ int main(int argc, char **argv) {
     }
 
     t_load_us = dragon_time_us() - t_start_us;
-
-    if (params.load_model_only) {
-      fprintf(stderr, "%s: model loaded successfully\n", __func__);
-      return 0;
-    }
   }
 
   // print system information

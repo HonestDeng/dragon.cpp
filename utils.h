@@ -35,8 +35,6 @@ struct gpt_params {
     bool interactive = false; // interactive mode
     bool interactive_start = false; // reverse prompt immediately
     std::string antiprompt = ""; // string upon seeing which more user input is prompted
-
-    bool load_model_only = false; // only load model for testing, not run inference
 };
 
 bool gpt_params_parse(int argc, char ** argv, gpt_params & params);
@@ -163,6 +161,9 @@ struct llama_model {
 };
 
 // Helper functions for model loading
+bool llama_model_load(const std::string &fname, llama_model &model,
+                      gpt_vocab &vocab, int user_n_ctx);
+
 bool load_hparams(std::ifstream &fin, llama_hparams &hparams, int user_n_ctx,
                   int &n_ff, int &n_parts);
 

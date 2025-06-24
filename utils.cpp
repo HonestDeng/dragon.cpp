@@ -75,8 +75,6 @@ bool gpt_params_parse(int argc, char ** argv, gpt_params & params) {
         } else if (arg == "-h" || arg == "--help") {
             gpt_print_usage(argc, argv, params);
             exit(0);
-        } else if (arg == "--load-model-only") {
-            params.load_model_only = true;
         } else {
             fprintf(stderr, "error: unknown argument: %s\n", arg.c_str());
             gpt_print_usage(argc, argv, params);
@@ -113,7 +111,6 @@ void gpt_print_usage(int argc, char ** argv, const gpt_params & params) {
     fprintf(stderr, "  -b N, --batch_size N  batch size for prompt processing (default: %d)\n", params.n_batch);
     fprintf(stderr, "  -m FNAME, --model FNAME\n");
     fprintf(stderr, "                        model path (default: %s)\n", params.model.c_str());
-    fprintf(stderr, "  --load-model-only     only load model for testing, not run inference\n");
     fprintf(stderr, "\n");
 }
 
@@ -996,5 +993,69 @@ bool load_model_weights(const std::string &fname, int n_parts,
     fin.close();
   }
 
+  return true;
+}
+
+// load the model's weights from a file
+bool llama_model_load(const std::string &fname, llama_model &model,
+                      gpt_vocab &vocab, int user_n_ctx) { // Changed n_ctx to user_n_ctx for clarity
+  fprintf(stderr, "%s: loading model from '%s' - please wait ...\n", __func__,
+          fname.c_str());
+
+  // Open file and check magic number
+  std::ifstream fin(fname, std::ios::binary);
+  std::vector<char> f_buf(1024 * 1024); // Optional: buffer for initial reads
+  fin.rdbuf()->pubsetbuf(f_buf.data(), f_buf.size());
+
+  if (!fin) {
+    fprintf(stderr, "%s: failed to open '%s'\n", __func__, fname.c_str());
+    return false;
+  }
+
+  {
+    uint32_t magic;
+    fin.read((char *)&magic, sizeof(magic));
+    if (magic != 0x4b4c535) {
+      fprintf(stderr, "%s: invalid model file '%s' (bad magic)\n", __func__,
+              fname.c_str());
+      return false;
+    }
+  }
+
+  int n_ff = 0;
+  int n_parts = 0;
+
+  // Load hparams using helper
+  if (!load_hparams(fin, model.hparams, user_n_ctx, n_ff, n_parts)) {
+    fin.close();
+    return false;
+  }
+
+  // Load vocab using helper
+  if (!load_vocab(fin, vocab, model.hparams)) {
+    fin.close();
+    return false;
+  }
+
+  // Close the initial file stream as metadata is read
+  fin.close();
+
+
+  // Create context and allocate tensors using helper
+  if (!create_model_context_and_allocate_tensors(fname, model, n_ff)) {
+    // Context creation failed, model.ctx might be invalid, cleanup?
+    // dragon_free(model.ctx); // Maybe add a cleanup helper too
+    return false;
+  }
+
+  // Load weights using helper
+  if (!load_model_weights(fname, n_parts, model)) {
+    // Weight loading failed, cleanup?
+    // dragon_free(model.ctx);
+    return false;
+  }
+
+  // All steps successful
+  fprintf(stderr, "%s: model loaded successfully\n", __func__);
   return true;
 }
