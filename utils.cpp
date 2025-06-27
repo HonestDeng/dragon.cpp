@@ -425,14 +425,15 @@ gpt_vocab::id llama_sample_top_p_top_k(
         double top_p,
         double temp,
         std::mt19937 & rng) {
-    int n_logits = vocab.id_to_token.size();
+
+    uint32_t vocab_ret_id = 0;
 
     std::vector<std::pair<double, gpt_vocab::id>> logits_id;
-    logits_id.reserve(n_logits);
+    logits_id.reserve(vocab.id_to_token.size());
 
     {
         const double scale = 1.0/temp;
-        for (int i = 0; i < n_logits; ++i) {
+        for (int i = 0; i < vocab.id_to_token.size(); ++i) {
             // repetition penalty from CTRL paper (https://arxiv.org/abs/1909.05858)
             // credit https://github.com/facebookresearch/llama/compare/main...shawwn:llama:main
             if (std::find(last_n_tokens.begin(), last_n_tokens.end(), i) != last_n_tokens.end()) {
@@ -441,7 +442,7 @@ gpt_vocab::id llama_sample_top_p_top_k(
                     logits_id.push_back(std::make_pair(logits[i]*scale*repeat_penalty, i));
                 } else {
                     logits_id.push_back(std::make_pair(logits[i]*scale/repeat_penalty, i));
-                }                
+                }
             } else {
                 logits_id.push_back(std::make_pair(logits[i]*scale, i));
             }
@@ -497,8 +498,8 @@ gpt_vocab::id llama_sample_top_p_top_k(
 
     std::discrete_distribution<> dist(probs.begin(), probs.end());
     int idx = dist(rng);
-
-    return logits_id[idx].second;
+    vocab_ret_id = logits_id[idx].second;
+    return vocab_ret_id;
 }
 
 
