@@ -75,6 +75,39 @@ bool gpt_params_parse(int argc, char ** argv, gpt_params & params) {
         } else if (arg == "-h" || arg == "--help") {
             gpt_print_usage(argc, argv, params);
             exit(0);
+        } else if (arg == "--structure-output-choice") {
+            params.structure_output_choice = true;
+        } else if (arg == "--structure-output-json") {
+            params.structure_output_json = true;
+        } else if (arg == "--structure-output-choice-option") {
+            // intput as: "option1,option2,option3", split by comma and push back to params.structure_output_choice_options
+            std::string option_str = argv[++i];
+            std::stringstream ss(option_str);
+            std::string option;
+            while (std::getline(ss, option, ',')) {
+                params.structure_output_choice_options.push_back(option);
+            }
+            // print the options for debug
+            // for (const auto & option : params.structure_output_choice_options) {
+            //     fprintf(stderr, "option: %s\n", option.c_str());
+            // }
+            // exit(0);
+        } else if (arg == "--structure-output-json-key") {
+            // input as: "key1:type1,key2:type2,key3:type3", split by comma and push back to params.structure_output_json_map
+            std::string key_type_str = argv[++i];
+            std::stringstream ss(key_type_str);
+            std::string key_type;
+            while (std::getline(ss, key_type, ',')) {
+                // split by colon
+                std::string key = key_type.substr(0, key_type.find(':'));
+                std::string type = key_type.substr(key_type.find(':') + 1);
+                params.structure_output_json_map[key] = type;
+            }
+            // print the map for debug
+            // for (const auto & kv : params.structure_output_json_map) {
+            //     fprintf(stderr, "key: %s, type: %s\n", kv.first.c_str(), kv.second.c_str());
+            // }
+            // exit(0);
         } else {
             fprintf(stderr, "error: unknown argument: %s\n", arg.c_str());
             gpt_print_usage(argc, argv, params);
@@ -111,6 +144,16 @@ void gpt_print_usage(int argc, char ** argv, const gpt_params & params) {
     fprintf(stderr, "  -b N, --batch_size N  batch size for prompt processing (default: %d)\n", params.n_batch);
     fprintf(stderr, "  -m FNAME, --model FNAME\n");
     fprintf(stderr, "                        model path (default: %s)\n", params.model.c_str());
+    fprintf(stderr, "  --structure-output-choice\n");
+    fprintf(stderr, "                        structure output in choice format (default: false)\n");
+    fprintf(stderr, "  --structure-output-json\n");
+    fprintf(stderr, "                        structure output in json format (default: false)\n");
+    fprintf(stderr, "  --structure-output-choice-option OPTIONS\n");
+    fprintf(stderr, "                        options for structure output in choice format (default: empty)\n");
+    fprintf(stderr, "                        input as: 'option1,option2,option3'\n");
+    fprintf(stderr, "  --structure-output-json-key KEYS\n");
+    fprintf(stderr, "                        keys for structure output in json format (default: empty)\n");
+    fprintf(stderr, "                        input as: 'key1:type1,key2:type2,key3:type3'\n");
     fprintf(stderr, "\n");
 }
 
