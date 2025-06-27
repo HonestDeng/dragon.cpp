@@ -75,6 +75,10 @@ bool gpt_params_parse(int argc, char ** argv, gpt_params & params) {
         } else if (arg == "-h" || arg == "--help") {
             gpt_print_usage(argc, argv, params);
             exit(0);
+        } else if (arg == "--structure-output-choice") {
+            params.structure_output_choice = true;
+        } else if (arg == "--structure-output-json") {
+            params.structure_output_json = true;
         } else {
             fprintf(stderr, "error: unknown argument: %s\n", arg.c_str());
             gpt_print_usage(argc, argv, params);
@@ -111,6 +115,10 @@ void gpt_print_usage(int argc, char ** argv, const gpt_params & params) {
     fprintf(stderr, "  -b N, --batch_size N  batch size for prompt processing (default: %d)\n", params.n_batch);
     fprintf(stderr, "  -m FNAME, --model FNAME\n");
     fprintf(stderr, "                        model path (default: %s)\n", params.model.c_str());
+    fprintf(stderr, "  --structure-output-choice\n");
+    fprintf(stderr, "                        structure output in choice format (default: false)\n");
+    fprintf(stderr, "  --structure-output-json\n");
+    fprintf(stderr, "                        structure output in json format (default: false)\n");
     fprintf(stderr, "\n");
 }
 

@@ -35,6 +35,9 @@ struct gpt_params {
     bool interactive = false; // interactive mode
     bool interactive_start = false; // reverse prompt immediately
     std::string antiprompt = ""; // string upon seeing which more user input is prompted
+
+    bool structure_output_choice = false;
+    bool structure_output_json = false;
 };
 
 bool gpt_params_parse(int argc, char ** argv, gpt_params & params);
