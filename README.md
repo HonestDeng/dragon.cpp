@@ -26,7 +26,7 @@
 
 1. 我们将推理过程拆分为若干个阶段，每个阶段的评分规则可以使用 python test-suit/test_grading_system.py --rules 查看。
 
-2. **分数相同者，测试用时较段者位次更高**，即测试时间最长12个小时，可以提前“交卷”。
+2. **分数相同者，测试用时较短者位次更高**，即测试时间最长12个小时，可以提前"交卷"。
 
 3. 我们要求测试者提交一份解题报告，分值为20分（分值不低，请认真对待）。内容至少包括：
 **Bug 定位：** 清晰地说明你找到了哪些 bugs，并指出每个 bug 所在的具体文件和代码行号（修复前的行号）。
@@ -45,6 +45,60 @@
 2. -t 参数可以指定线程数量，-t 1指定线程数为1。
 
 3. 该链接对你可能有帮助：https://github.com/noamgat/lm-format-enforcer?tab=readme-ov-file#how-does-it-work
+
+4. test_grading_system.py的最后两个测试点是模型的**结构化输出**。面试者需要使用**结构化输出技术**限制模型的输出必须符合某一种规则。
+在test_step_6_structure_output_choice中，面试者需要限制模型的输出必须为给定可选项中的一个；在test_step_7_structure_output_json中，
+面试者需要限制模型的输出必须为一个具有特定键的json结构体。同时考虑到，虽然面试者可以限制模型输出的结构，但是模型输出的内容是否符合语义是由模型能力
+和prompt决定的。因此我们的测试脚本只会测试模型的输出是否符合指定的pattern，而不考虑语义是否正确。
+比如说，对于
+
+```shell
+--structure-output-json --structure-output-json-key name:string,age:int,city:string -p "Provide user details for John Doe, who is 30 years old and lives in New York."
+```
+
+我们认为下面的两个json都是正确的，因为都包括了name、age和city字段：
+```json
+{
+    "name": "John",
+    "age": 30,
+    "city": "Beijing"
+}
+
+{
+    "name": "Bruce Lee",
+    "age": 40,
+    "city": "New York"
+}
+```
+
+但是下面的输出是不对的，因为不符合指定的pattern：
+```json
+{
+    "name": "John"
+}
+```
+
+**注意**：因为我们不检查输出的语义，所以很多人会想到，欺骗测试脚本拿到所有分数的最简单的办法是
+手动构造一个符合要求的json，而不是让模型型输出：
+
+```C++
+
+std::cout << "{" << std::endl;
+
+for(auto &key_type_pair : params.structure_output_json_map) {
+    std::cout <<"\"" << key_type_pair.first << "\"" << ": ";
+    if (key_type_pair.second == "string") {
+    std::cout << "\"String\"" << "," << std::endl;
+    } else if (key_type_pair.second == "int") {
+    std::cout << "30" << "," << std::endl;
+    } 
+}
+
+std::cout << "}" << std::endl;
+
+```
+
+但是我们会检查面试者的代码，如果发现尝试欺骗测试脚本，那么**分数请会被清零**。
 
 
 ## 提交指南
