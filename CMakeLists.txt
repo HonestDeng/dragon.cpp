@@ -103,16 +103,16 @@ add_executable(quantize
         utils.h)
 
 # 如果有test-script目录，则添加tokenizer和model-loader
-if (EXISTS ${CMAKE_SOURCE_DIR}/test-script/tokenizer.cpp)
+if (EXISTS ${CMAKE_SOURCE_DIR}/test-suit/tokenizer.cpp)
     add_executable(tokenizer
-            ${CMAKE_SOURCE_DIR}/test-script/tokenizer.cpp
+            ${CMAKE_SOURCE_DIR}/test-suit/tokenizer.cpp
             utils.cpp
             utils.h)
 endif()
 
-if (EXISTS ${CMAKE_SOURCE_DIR}/test-script/model-loader.cpp)
+if (EXISTS ${CMAKE_SOURCE_DIR}/test-suit/model-loader.cpp)
     add_executable(model-loader
-            ${CMAKE_SOURCE_DIR}/test-script/model-loader.cpp
+            ${CMAKE_SOURCE_DIR}/test-suit/model-loader.cpp
             utils.cpp
             utils.h)
 endif()
@@ -120,10 +120,10 @@ endif()
 target_compile_definitions(operators PUBLIC ${LLAMA_EXTRA_FLAGS})
 target_compile_definitions(llama PUBLIC ${LLAMA_EXTRA_FLAGS})
 target_compile_definitions(quantize PUBLIC ${LLAMA_EXTRA_FLAGS})
-if (EXISTS ${CMAKE_SOURCE_DIR}/test-script/tokenizer.cpp)
+if (EXISTS ${CMAKE_SOURCE_DIR}/test-suit/tokenizer.cpp)
     target_compile_definitions(tokenizer PUBLIC ${LLAMA_EXTRA_FLAGS})
 endif()
-if (EXISTS ${CMAKE_SOURCE_DIR}/test-script/model-loader.cpp)
+if (EXISTS ${CMAKE_SOURCE_DIR}/test-suit/model-loader.cpp)
     target_compile_definitions(model-loader PUBLIC ${LLAMA_EXTRA_FLAGS})
 endif()
 
@@ -133,9 +133,9 @@ target_include_directories(operators PUBLIC .)
 target_link_libraries(operators PRIVATE Threads::Threads)
 target_link_libraries(quantize PRIVATE operators)
 target_link_libraries(llama PRIVATE operators)
-if (EXISTS ${CMAKE_SOURCE_DIR}/test-script/tokenizer.cpp)
+if (EXISTS ${CMAKE_SOURCE_DIR}/test-suit/tokenizer.cpp)
     target_link_libraries(tokenizer PRIVATE operators)
 endif()
-if (EXISTS ${CMAKE_SOURCE_DIR}/test-script/model-loader.cpp)
+if (EXISTS ${CMAKE_SOURCE_DIR}/test-suit/model-loader.cpp)
     target_link_libraries(model-loader PRIVATE operators)
 endif()
