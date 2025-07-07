@@ -13,6 +13,9 @@
   把 `ggml.h / ggml.cpp` 改写为 `operators.h / operators.cpp`，避免通过文件名直接关联到上游实现。
 
 
+题目答案位于`solution`分支。
+
+
 ## 项目简介
 
 欢迎参加本次挑战！本项目旨在 CPU 上运行大型语言模型推理引擎的修改版本。
