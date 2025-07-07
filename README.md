@@ -13,6 +13,21 @@
   把 `ggml.h / ggml.cpp` 改写为 `operators.h / operators.cpp`，避免通过文件名直接关联到上游实现。
 
 
+### 题目参考答案
+
+以下列举的是我们在 `dragon.cpp` 主分支中**故意埋设的关键缺陷**，供面试者排查与修复。参考实现请见 `solution` 分支。
+
+| # | 缺陷类别 | 具体修改 | 预期影响 |
+|---|----------|----------|-----------|
+| **1** | Magic Number | 将 `utils.cpp` 中的文件标识符由 `0x4B4C535` 错误改写为 `0x4B4C535`（位数不一致）。 | 文件无法被正确识别，模型加载直接失败。 |
+| **2** | 引用失效 | 把 `auto & ctx = model.ctx;` 改成 `auto ctx = model.ctx;`。 | 产生 **浅拷贝**，导致后续对 `ctx` 的修改不会同步到 `model.ctx`，引发参数错乱。 |
+| **3** | Causal Mask 缺失 | 在 `attention_forward()` 中删除了 `dragon_diag_mask_inf()`，即因果掩码计算。 | 多头注意力可“偷看”未来 Token，推理结果严重偏离预期。 |
+| **4** | Residual Connection  | 在 `ffn_forward()` 去掉了 `dragon_add(ctx0, cur, inpFF)` 残差连接。 | 破坏 Transformer 信息流，训练/推理精度显著下降。 |
+| **5** | 线程同步 | 大幅改动 `operators.c` 中的 `dragon_graph_compute_thread()` 与 `dragon_graph_compute()`。 | 竞态条件与死锁并存，随机崩溃或卡死；可用 `diff` 对比 `main` 与 `solution` 获取细节。 |
+| **6** | Tokenizer 缺失 | 删除 `llama_tokenize()` 的全部实现。 | 面试者需基于提供的词表与 BPE 规则自行补全分词逻辑。 |
+| **7** | ID 溢出 | 在 `llama_sample_top_p_top_k()` 将 `vocab_ret_id` 的类型由 `uint32_t` 改为 `uint8_t`。 | 当词表大小 > 255 时发生整数溢出，采样结果错乱。 |
+| **8** | 结构化输出 | 开放题：面试者根据想法自己的想法自由实现 |
+
 
 ## 项目简介
 
